@@ -8,6 +8,29 @@ Se utilizará como fuente de información única y exclusivamente los documentos
 
 **Desarrollo de la práctica**: al finalizar el Tema 6.
 
+## Uso del servicio
+
+Requisitos: Ollama con `llama3` y `bge-m3`, y Docker para Qdrant.
+
+```bash
+docker compose up -d       # Qdrant
+./mvnw spring-boot:run     # http://localhost:8004
+```
+
+| Método | URL | Descripción |
+|--------|-----|-------------|
+| POST | `/rag/ingest` | Indexa los PDFs de `docs/` en Qdrant (se puede repetir sin duplicar). |
+| DELETE | `/rag/clear` | Borra todo lo indexado. |
+| GET | `/tutor/explicar?tema=...` | Explica el tema y lista los PDFs usados. |
+
+```bash
+curl -X POST http://localhost:8004/rag/ingest
+curl -G http://localhost:8004/tutor/explicar --data-urlencode "tema=Qué es la arquitectura hexagonal"
+```
+
+Respuesta: `{"explicacion": "...", "fuentes": ["arquitectura hexagonal.pdf"]}`.
+Si el tema no está en los documentos, `fuentes` viene vacío. Errores: `400` (tema vacío o de más de 300 caracteres) y `503` (Qdrant u Ollama caídos).
+
 ## Cómo empezar
 
 1. Pulsa el botón **`Use this template`** (arriba a la derecha de este repositorio) → **`Create a new repository`**.
