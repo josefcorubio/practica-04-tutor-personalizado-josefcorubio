@@ -22,7 +22,6 @@ public class IngestionService {
 		this.vectorStore = vectorStore;
 	}
 
-	//indexa todos los pdf; antes borra los chunks previos de cada fichero para no duplicar
 	public int ingestarDocumentos() {
 		int total = 0;
 		for (String fileName : pdfLoaderComponent.listarPdfs()) {

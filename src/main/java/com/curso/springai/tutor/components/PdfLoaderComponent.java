@@ -18,8 +18,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class PdfLoaderComponent {
-	//caracteres aproximados que se agrupan de páginas consecutivas antes de trocear
-	private static final int CARACTERES_POR_BLOQUE = 3000;
+	//Caracteres por bloque
+	private static final int CARACTERES_X_BLOQUE = 3000;
 
 	private final Path rootPath;
 	private final TokenTextSplitter splitter;
@@ -46,13 +46,13 @@ public class PdfLoaderComponent {
 		}
 	}
 
-	//devuelve los chunks de un pdf con metadatos file_name, page_start y page_end
+	//Obtener los chunks de un pdf con metadatos file_name, page_start y page_end
 	public List<Document> obtenerChunks(String fileName) {
 		Path pdf = rootPath.resolve(fileName);
 		return splitter.split(agruparPaginas(pdf));
 	}
 
-	//lee el pdf página a página y agrupa páginas consecutivas en bloques de texto
+	//Lee el pdf página a página y agrupa páginas consecutivas en bloques de texto
 	private List<Document> agruparPaginas(Path pdfPath) {
 		String fileName = pdfPath.getFileName().toString();
 		List<Document> bloques = new ArrayList<>();
@@ -71,7 +71,7 @@ public class PdfLoaderComponent {
 					inicio = pagina;
 				}
 				buffer.append(texto).append("\n\n");
-				if (buffer.length() >= CARACTERES_POR_BLOQUE) {
+				if (buffer.length() >= CARACTERES_X_BLOQUE) {
 					bloques.add(crearBloque(buffer, fileName, inicio, pagina));
 					buffer.setLength(0);
 				}
