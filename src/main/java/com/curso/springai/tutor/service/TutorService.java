@@ -8,11 +8,13 @@ import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Service;
 
+import com.curso.springai.tutor.exception.ServicioNoDisponibleException;
 import com.curso.springai.tutor.model.RespuestaTutor;
 
 @Service
 public class TutorService {
-	private static final String SIN_INFORMACION = "No he encontrado información sobre este tema en los documentos disponibles.";
+	static final int MAX_LONGITUD_TEMA = 300;
+	static final String SIN_INFORMACION = "No he encontrado información sobre este tema en los documentos disponibles.";
 
 	private final String system = """
 			Eres un tutor experto que explica conceptos y tecnologías a estudiantes.
@@ -34,6 +36,20 @@ public class TutorService {
 	}
 
 	public RespuestaTutor explicar(String tema) {
+		if (tema == null || tema.isBlank()) {
+			throw new IllegalArgumentException("El tema no puede estar vacío.");
+		}
+		if (tema.length() > MAX_LONGITUD_TEMA) {
+			throw new IllegalArgumentException("El tema no puede superar los " + MAX_LONGITUD_TEMA + " caracteres.");
+		}
+		try {
+			return responder(tema.trim());
+		} catch (RuntimeException e) {
+			throw new ServicioNoDisponibleException("No se pudo consultar Qdrant u Ollama. Comprueba que estén en marcha.", e);
+		}
+	}
+
+	private RespuestaTutor responder(String tema) {
 		List<Document> chunks = vectorStore.similaritySearch(SearchRequest.builder()
 				.query(tema)
 				.topK(5)
